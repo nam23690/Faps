@@ -7,17 +7,12 @@ using System.Threading.Tasks;
 using System.Transactions;
 namespace FAP.Common.Application.Interfaces
 
+{
+    public interface IUnitOfWork
     {
-        public interface IUnitOfWork
-        {
-            Task BeginTransactionAsync();
-            Task CommitTransactionAsync();
-            Task RollbackTransactionAsync();
-            void BeginScope(TransactionScopeOption option = TransactionScopeOption.Required);
-            void CompleteScope();
-            Task<int> SaveChangesAsync(CancellationToken cancellation);
-            
-        }
+        Task<int> SaveChangesAsync(CancellationToken cancellationToken);
+
     }
+}
 
 

@@ -1,6 +1,8 @@
 ﻿using FAP.Common.Application.Interfaces;
 using FAP.Common.Infrastructure.Persistence;
 using FAP.Common.Infrastructure.Repositories;
+using FAP.Domain.Common;
+using MediatR;
 using Microsoft.EntityFrameworkCore.Storage;
 using System.Transactions;
 
@@ -11,84 +13,39 @@ namespace FAP.Infrastructure.Persistence
     public class UnitOfWork : IUnitOfWork
     {
         private readonly UniversityDbContext _context;
-        private IDbContextTransaction? _transaction;
-        private TransactionScope? _scope;
+        private readonly IMediator _mediator;
 
 
-        public UnitOfWork(UniversityDbContext context)
+        public UnitOfWork(UniversityDbContext context, IMediator mediator)
         {
             _context = context;
+            _mediator = mediator;
         }
 
-
-        public async Task BeginTransactionAsync()
+        public async Task<int> SaveChangesAsync(CancellationToken ct)
         {
-            if (_transaction != null) return; // Tránh mở 2 transaction
+            // 1. Lấy domain events trước commit
+            var domainEvents = _context.ChangeTracker
+                .Entries<AggregateRoot>()
+                .SelectMany(e => e.Entity.DomainEvents)
+                .ToList();
 
-            _transaction = await _context.Database.BeginTransactionAsync();
-        }
+            // 2. Commit DB
+            var result = await _context.SaveChangesAsync(ct);
 
-        public async Task CommitTransactionAsync()
-        {
-            if (_transaction == null)
-                throw new InvalidOperationException("No transaction to commit");
-
-            try
+            // 3. Dispatch domain events SAU commit
+            foreach (var domainEvent in domainEvents)
             {
-                await _context.SaveChangesAsync(default);
-                await _transaction.CommitAsync();
+                await _mediator.Publish(domainEvent, ct);
             }
-            catch
+
+            // 4. Clear
+            foreach (var entry in _context.ChangeTracker.Entries<AggregateRoot>())
             {
-                await RollbackTransactionAsync();
-                throw;
+                entry.Entity.ClearDomainEvents();
             }
-            finally
-            {
-                await _transaction.DisposeAsync();
-                _transaction = null;
-            }
-        }
 
-        public async Task RollbackTransactionAsync()
-        {
-            if (_transaction == null) return;
-
-            await _transaction.RollbackAsync();
-            await _transaction.DisposeAsync();
-            _transaction = null;
-        }
-
-        public void BeginScope(
-            TransactionScopeOption option = TransactionScopeOption.Required)
-        {
-            _scope = new TransactionScope(
-                option,
-                new TransactionOptions
-                {
-                    IsolationLevel = IsolationLevel.ReadCommitted
-                },
-                TransactionScopeAsyncFlowOption.Enabled
-            );
-        }
-
-        public void CompleteScope()
-        {
-            if (_scope == null)
-                throw new InvalidOperationException("No TransactionScope started");
-
-            _scope.Complete();
-            _scope.Dispose();
-            _scope = null;
-        }
-        //Lưu thay đổi
-        public Task<int> SaveChangesAsync(CancellationToken cancellation)
-            => _context.SaveChangesAsync(cancellation);
-
-        public void Dispose()
-        {
-            _transaction?.Dispose();
-            _context.Dispose();
+            return result;
         }
     }
 

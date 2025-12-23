@@ -12,10 +12,11 @@ public class DeleteTermCommand : IRequest<Unit>
         : IRequestHandler<DeleteTermCommand, Unit>
     {
         private readonly ITermRepository _repository;
-
-        public Handler(ITermRepository repository)
+        private readonly IUnitOfWork _unitOfWork;
+        public Handler(ITermRepository repository, IUnitOfWork unitOfWork)
         {
             _repository = repository;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<Unit> Handle(
@@ -30,9 +31,8 @@ public class DeleteTermCommand : IRequest<Unit>
                 throw new DomainException("Term not found");
 
             term.SoftDelete();
-
-            // ❗ KHÔNG SaveChanges ở đây (STRICT DDD)
-            // Commit sẽ do UnitOfWork / Behavior xử lý
+            // 🔥 COMMIT RÕ RÀNG – STRICT DDD
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Unit.Value;
         }

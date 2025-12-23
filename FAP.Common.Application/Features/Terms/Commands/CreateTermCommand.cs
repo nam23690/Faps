@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 using FAP.Common.Application.Interfaces;
 using FAP.Common.Domain.Academic.Terms;
 using FAP.Common.Domain.Academic.Terms.Services;
@@ -16,13 +16,15 @@ public class CreateTermCommand : IRequest<Guid>
     {
         private readonly ITermRepository _termRepository;
         private readonly ITermUniquenessChecker _checker;
-
+        private readonly IUnitOfWork _unitOfWork;
         public Handler(
             ITermRepository termRepository,
-            ITermUniquenessChecker checker)
+            ITermUniquenessChecker checker,
+            IUnitOfWork unitOfWork)
         {
             _termRepository = termRepository;
             _checker = checker;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<Guid> Handle(
@@ -39,7 +41,8 @@ public class CreateTermCommand : IRequest<Guid>
                 _checker);
 
             await _termRepository.AddAsync(term, cancellationToken);
-
+            // 🔥 COMMIT RÕ RÀNG – STRICT DDD
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
             return term.Id;
         }
     }

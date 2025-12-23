@@ -18,13 +18,16 @@ public class UpdateTermCommand : IRequest<Unit>
     {
         private readonly ITermRepository _repository;
         private readonly ITermUniquenessChecker _checker;
+        private readonly IUnitOfWork _unitOfWork;
 
         public Handler(
             ITermRepository repository,
-            ITermUniquenessChecker checker)
+            ITermUniquenessChecker checker,
+            IUnitOfWork unitOfWork)
         {
             _repository = repository;
             _checker = checker;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<Unit> Handle(
@@ -46,7 +49,8 @@ public class UpdateTermCommand : IRequest<Unit>
                 new TermName(request.Name),
                 duration,
                 _checker); // ✅ BẮT BUỘC
-
+            // 🔥 COMMIT RÕ RÀNG – STRICT DDD
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
             return Unit.Value;
         }
 
