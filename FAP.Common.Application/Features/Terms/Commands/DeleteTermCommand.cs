@@ -4,11 +4,12 @@ using FAP.Common.Domain.Common;
 
 namespace FAP.Common.Application.Features.Terms.Commands;
 
-public class DeleteTermCommand : IRequest
+public class DeleteTermCommand : IRequest<Unit>
 {
     public Guid Id { get; set; }
 
-    public class Handler : IRequestHandler<DeleteTermCommand>
+    public class Handler
+        : IRequestHandler<DeleteTermCommand, Unit>
     {
         private readonly ITermRepository _repository;
 
@@ -21,13 +22,17 @@ public class DeleteTermCommand : IRequest
             DeleteTermCommand request,
             CancellationToken cancellationToken)
         {
-            var term = await _repository.GetByIdAsync(request.Id, cancellationToken);
+            var term = await _repository.GetByIdAsync(
+                request.Id,
+                cancellationToken);
+
             if (term == null)
                 throw new DomainException("Term not found");
 
             term.SoftDelete();
 
-            await _repository.UpdateAsync(term, cancellationToken);
+            // ❗ KHÔNG SaveChanges ở đây (STRICT DDD)
+            // Commit sẽ do UnitOfWork / Behavior xử lý
 
             return Unit.Value;
         }

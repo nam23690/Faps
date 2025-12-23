@@ -28,8 +28,8 @@ public class UpdateTermCommand : IRequest<Unit>
         }
 
         public async Task<Unit> Handle(
-            UpdateTermCommand request,
-            CancellationToken cancellationToken)
+    UpdateTermCommand request,
+    CancellationToken cancellationToken)
         {
             var term = await _repository.GetByIdAsync(
                 request.Id,
@@ -42,22 +42,13 @@ public class UpdateTermCommand : IRequest<Unit>
                 request.StartDate,
                 request.EndDate);
 
-            if (await _checker.IsOverlappingAsync(
-                duration,
-                request.Id))
-            {
-                throw new DomainException("Term date overlaps");
-            }
-
-            term.UpdateAsync(
+            await term.UpdateAsync(
                 new TermName(request.Name),
-                duration);
-
-            await _repository.UpdateAsync(
-                term,
-                cancellationToken);
+                duration,
+                _checker); // ✅ BẮT BUỘC
 
             return Unit.Value;
         }
+
     }
 }
