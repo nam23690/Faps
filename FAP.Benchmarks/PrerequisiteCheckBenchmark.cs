@@ -44,13 +44,6 @@ namespace FAP.Benchmarks
         }
 
         [Benchmark]
-        public async Task Optimized()
-        {
-            var data = await _context.Users.Take(200).ToListAsync();
-            _consumer.Consume(data);
-        }
-
-        [Benchmark]
         public int AAA_Test()
         {
             return 1;

@@ -1,5 +1,6 @@
 ﻿using FAP.Common.Application.Events;
 using FAP.Common.Application.Interfaces;
+using FAP.Common.Domain.Academic.Terms;
 using FAP.Common.Domain.Base;
 using FAP.Common.Domain.Entities;
 using FAP.Common.Domain.Events;
@@ -25,14 +26,7 @@ namespace FAP.Common.Infrastructure.Persistence
         }
 
         #region DbSets
-        public DbSet<SinhVien> SinhViens { get; set; }
-        
-        public DbSet<MonHoc> MonHocs { get; set; }
-        public DbSet<DangKyMon> DangKyMons { get; set; }
-
-        public DbSet<User> Users { get; set; }
-
-        public DbSet<Term> Terms { get; set; }
+        public DbSet<Domain.Academic.Terms.Term> Terms { get; set; }
 
         #endregion
 

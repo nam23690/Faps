@@ -1,5 +1,5 @@
 ﻿using FAP.Common.Application.Interfaces;
-using FAP.Common.Domain.Entities;
+using FAP.Common.Domain.Academic.Terms;
 using FAP.Common.Infrastructure.Persistence;
 
 namespace FAP.Common.Infrastructure.Repositories

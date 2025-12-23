@@ -9,7 +9,7 @@ namespace FAP.Common.Application.Handlers
     {
         public Task Handle(DomainEventNotification<TermCreatedEventEmail> notification, CancellationToken ct)
         {
-            Console.WriteLine("\nStarting sending Email: " + notification.DomainEvent.term.SemesterName);
+            Console.WriteLine("\nStarting sending Email: " + notification.DomainEvent.term.Name);
             Console.WriteLine("\nFinised Email: ");
             return Task.CompletedTask;
         }

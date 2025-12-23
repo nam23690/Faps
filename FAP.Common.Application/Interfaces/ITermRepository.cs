@@ -1,5 +1,4 @@
-﻿using FAP.Share.Dtos;
-using FAP.Common.Domain.Entities;
+﻿using FAP.Common.Domain.Academic.Terms;
 
 namespace FAP.Common.Application.Interfaces
 {
