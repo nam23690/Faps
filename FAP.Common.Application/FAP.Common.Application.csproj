@@ -27,8 +27,4 @@
     <ProjectReference Include="..\FAP.Share.Dto\FAP.Share.Dtos.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Features\Terms\Queries\" />
-  </ItemGroup>
-
 </Project>

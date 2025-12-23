@@ -1,3 +1,4 @@
+using FAP.Common.Domain.Academic.Terms;
 using FAP.Common.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -8,31 +9,23 @@ namespace FAP.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<Term> builder)
         {
-            // If the database table is "Term"
-            builder.ToTable("Term");
-
-            // Mapping Id from BaseEntity to TermID column if we want to keep legacy DB schema
-            // Or just map to Id. For now, let's assume we map to "TermID" column but as int (or short conversion).
-            // However, BaseEntity.Id is int. If DB is short, this might fail at runtime.
-            // Safe bet: Map to "TermID" column.
+            // If the database table is "Terms"
+            builder.ToTable("Terms");
             builder.Property(t => t.Id)
                    .HasColumnName("TermID"); 
 
-            builder.Property(t => t.SemesterName)
+            builder.Property(t => t.Name)
                    .IsRequired()
                    .HasMaxLength(100);
 
-            builder.Property(t => t.StartDate)
+            builder.Property(t => t.Duration.StartDate)
                    .IsRequired();
 
-            builder.Property(t => t.EndDate)
+            builder.Property(t => t.Duration.EndDate)
                    .IsRequired();
 
-            builder.Property(t => t.IsClosed)
+            builder.Property(t => t.IsDeleted)
                    .HasDefaultValue(false);
-            
-            // Configure relationship if needed
-            // builder.HasOne(t => t.Campus)...
         }
     }
 }

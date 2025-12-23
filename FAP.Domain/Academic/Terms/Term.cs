@@ -30,6 +30,21 @@ public class Term : AggregateRoot
         };
     }
 
+    public async Task UpdateAsync(
+       TermName name,
+       DateRange duration,
+       ITermUniquenessChecker checker)
+    {
+        if (await checker.IsOverlappingAsync(duration, Id))
+            throw new DomainException("Term overlaps");
+
+        Name = name;
+        Duration = duration;
+    }
+
+
+
+
     public void SoftDelete()
     {
         IsDeleted = true;

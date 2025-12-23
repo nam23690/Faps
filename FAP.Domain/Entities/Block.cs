@@ -17,10 +17,6 @@ namespace FAP.Common.Domain.Entities
 
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
-
-        [ForeignKey(nameof(Term))]
         public short TermID { get; set; }
-
-        public virtual Term Term { get; set; }
     }
 }

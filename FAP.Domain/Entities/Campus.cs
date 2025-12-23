@@ -15,6 +15,5 @@ namespace FAP.Common.Domain.Entities
         public string ContactName { get; set; }
         public string Mobile { get; set; }
         public string Email { get; set; }
-        public ICollection<Term> Terms { get; set; }
     }
 }
