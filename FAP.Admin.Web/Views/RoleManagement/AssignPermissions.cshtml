@@ -1,0 +1,76 @@
+@model FAP.Share.Dtos.AssignPermissionsToRoleViewModel
+@{
+    ViewData["Title"] = "Gán quyền cho vai trò";
+    var permissionsByModule = Model.AvailablePermissions.GroupBy(p => p.Module).ToList();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Gán quyền cho vai trò: @Model.RoleName</h2>
+    <a asp-action="Details" asp-route-id="@Model.RoleId" class="btn btn-secondary">Quay lại</a>
+</div>
+
+<div class="alert alert-info">
+    <strong>Lưu ý:</strong> Quyền được gán cho vai trò sẽ tự động áp dụng cho tất cả người dùng có vai trò này.
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form asp-action="AssignPermissions" method="post">
+            <input type="hidden" asp-for="RoleId" />
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label class="form-label">Quyền hiện tại của vai trò:</label>
+                @if (Model.CurrentPermissions.Any())
+                {
+                    <div class="border rounded p-2 mb-3">
+                        @foreach (var permission in Model.CurrentPermissions)
+                        {
+                            <span class="badge bg-primary me-1">@permission</span>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">Vai trò này chưa có quyền nào</p>
+                }
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Chọn quyền (theo module):</label>
+                <div class="border rounded p-3" style="max-height: 500px; overflow-y: auto;">
+                    @foreach (var moduleGroup in permissionsByModule)
+                    {
+                        <div class="mb-4">
+                            <h6 class="text-primary border-bottom pb-2">@moduleGroup.Key</h6>
+                            @foreach (var permission in moduleGroup)
+                            {
+                                <div class="form-check ms-3">
+                                    <input class="form-check-input" type="checkbox" name="SelectedPermissions" value="@permission.Code" id="perm_@permission.Id"
+                                           @(Model.CurrentPermissions.Contains(permission.Code) ? "checked" : "") />
+                                    <label class="form-check-label" for="perm_@permission.Id">
+                                        <strong>@permission.Code</strong>
+                                        @if (!string.IsNullOrEmpty(permission.Description))
+                                        {
+                                            <span class="text-muted">- @permission.Description</span>
+                                        }
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+                <a asp-action="Details" asp-route-id="@Model.RoleId" class="btn btn-secondary">Hủy</a>
+                <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+

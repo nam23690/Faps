@@ -1,0 +1,67 @@
+@model UserLoginRequest
+@{
+    ViewData["Title"] = "Đăng nhập";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-4">
+        <div class="card mt-5">
+            <div class="card-header">
+                <h3 class="text-center">Đăng nhập</h3>
+            </div>
+            <div class="card-body">
+                <form asp-action="Login" asp-controller="Auth" method="post">
+                    <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+                    
+                    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Username" class="form-label">Tên đăng nhập</label>
+                        <input asp-for="Username" class="form-control" placeholder="Nhập tên đăng nhập hoặc email" autocomplete="username" />
+                        <span asp-validation-for="Username" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label">Mật khẩu</label>
+                        <input asp-for="Password" class="form-control" type="password" placeholder="Nhập mật khẩu" autocomplete="current-password" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="CampusCode" class="form-label">Cơ sở</label>
+                        <select asp-for="CampusCode" class="form-select">
+                            <option value="">-- Chọn cơ sở --</option>
+                            @{
+                                var campuses = ViewBag.Campuses as Dictionary<string, string> ?? new Dictionary<string, string>
+                                {
+                                    { "HN", "Cơ sở Hà Nội" },
+                                    { "HCM", "Cơ sở TP. Hồ Chí Minh" },
+                                    { "DN", "Cơ sở Đà Nẵng" },
+                                    { "CT", "Cơ sở Cần Thơ" },
+                                    { "QN", "Cơ sở Quy Nhơn" }
+                                };
+
+                                foreach (var kvp in campuses)
+                                {
+                                    var isSelected = string.Equals(Model?.CampusCode, kvp.Key, StringComparison.OrdinalIgnoreCase);
+                                    <option value="@kvp.Key" selected="@(isSelected ? "selected" : null)">@kvp.Value</option>
+                                }
+                            }
+                        </select>
+                        <span asp-validation-for="CampusCode" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Đăng nhập</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+

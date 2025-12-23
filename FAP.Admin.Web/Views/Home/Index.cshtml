@@ -1,0 +1,17 @@
+﻿@{
+    ViewData["Title"] = "Trang chủ";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Chào mừng</h1>
+    @if (ViewData["FullName"] != null)
+    {
+        <p class="lead">Xin chào, <strong>@ViewData["FullName"]</strong>!</p>
+        <p>Email: @ViewData["Email"]</p>
+        <p>Tên đăng nhập: @ViewData["Username"]</p>
+    }
+    else
+    {
+        <p>Vui lòng <a asp-controller="Auth" asp-action="Login">đăng nhập</a> để tiếp tục.</p>
+    }
+</div>

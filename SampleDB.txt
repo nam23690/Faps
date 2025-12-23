@@ -1,0 +1,123 @@
+//Tạo 2 db AP_HL và AP_HCM
+Mỗi DB sẽ có 02 bảng sau
+
+CREATE TABLE [dbo].[Terms](
+	[TermID] [smallint] NOT NULL,
+	[CampusID] [smallint] NOT NULL,
+	[SemesterName] [varchar](20) NOT NULL,
+	[StartDate] [smalldatetime] NOT NULL,
+	[EndDate] [smalldatetime] NOT NULL,
+	[IsClosed] [bit] NULL,
+	[UpdatedAt] [datetime] NULL,
+	[CreatedAt] [datetime] NULL,
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+ CONSTRAINT [PK__Terms__410A2E455441852A] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+ CONSTRAINT [CampusID_Semester_Unique] UNIQUE NONCLUSTERED 
+(
+	[CampusID] ASC,
+	[SemesterName] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+
+
+/****** Object:  Table [dbo].[Users]    Script Date: 12/5/2025 6:43:55 PM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[Users](
+	[Login] [varchar](20) NOT NULL,
+	[Fullname] [nvarchar](100) NOT NULL,
+	[CampusID] [smallint] NULL,
+	[Mark_Key] [varchar](150) NULL,
+	[AlternativeEmail] [varchar](255) NULL,
+	[IDFeID] [varchar](255) NULL,
+	[Email] [varchar](255) NULL,
+	[Password] [nvarchar](100) NULL,
+	[EntryDate] [datetime] NOT NULL,
+	[ExpriceDate] [datetime] NULL,
+	[GAEnabled] [bit] NULL,
+	[GASecretKey] [varchar](100) NULL,
+	[CreatedAt] [datetime] NULL,
+	[UpdatedAt] [datetime] NULL,
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+ CONSTRAINT [PK_Users] PRIMARY KEY CLUSTERED 
+(
+	[Login] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[Users] ADD  CONSTRAINT [DF__Users__EntryDate__2B36194D]  DEFAULT (getdate()) FOR [EntryDate]
+GO
+
+
+
+// Tạo 1 db AP_Log
+Chạy lệnh sau:
+USE [AP_Log]
+GO
+
+/****** Object:  Table [dbo].[AuditLogs]    Script Date: 12/5/2025 6:50:45 PM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[AuditLogs](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[UserId] [nvarchar](50) NULL,
+	[UserName] [nvarchar](50) NULL,
+	[Action] [nvarchar](50) NULL,
+	[Entity] [nvarchar](50) NULL,
+	[EntityId] [nvarchar](50) NULL,
+	[OldValue] [nvarchar](max) NULL,
+	[NewValue] [nvarchar](max) NULL,
+	[CampusCode] [nvarchar](50) NULL,
+	[IpAddress] [nvarchar](50) NULL,
+	[CreatedAt] [datetime] NULL,
+	[UpdatedAt] [datetime] NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
+USE [AP_Log]
+GO
+
+/****** Object:  Table [dbo].[PerformanceLogs]    Script Date: 12/5/2025 6:51:13 PM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[PerformanceLogs](
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[TraceId] [uniqueidentifier] NOT NULL,
+	[UserName] [nvarchar](200) NULL,
+	[CampusCode] [nvarchar](50) NULL,
+	[FeatureName] [nvarchar](200) NOT NULL,
+	[ElapsedMilliseconds] [int] NOT NULL,
+	[RequestTime] [datetime] NOT NULL,
+	[Method] [nvarchar](20) NULL,
+	[Path] [nvarchar](300) NULL,
+	[StatusCode] [int] NULL,
+	[Host] [nvarchar](200) NULL,
+	[CreatedAt] [datetime] NULL,
+	[UpdatedAt] [datetime] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+
+
+

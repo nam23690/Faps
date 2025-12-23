@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "FAP.Benchmarks": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}

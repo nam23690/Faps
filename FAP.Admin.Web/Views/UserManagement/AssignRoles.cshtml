@@ -1,0 +1,67 @@
+@model FAP.Share.Dtos.AssignRolesViewModel
+@{
+    ViewData["Title"] = "Gán vai trò";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Gán vai trò cho: @Model.FullName (@Model.UserName)</h2>
+    <a asp-action="Details" asp-route-id="@Model.UserId" class="btn btn-secondary">Quay lại</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form asp-action="AssignRoles" method="post">
+            <input type="hidden" asp-for="UserId" />
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label class="form-label">Vai trò hiện tại:</label>
+                @if (Model.CurrentRoles.Any())
+                {
+                    <div class="border rounded p-2 mb-3">
+                        @foreach (var role in Model.CurrentRoles)
+                        {
+                            <span class="badge bg-primary me-1">@role</span>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">Chưa có vai trò nào</p>
+                }
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Chọn vai trò:</label>
+                <div class="border rounded p-3" style="max-height: 300px; overflow-y: auto;">
+                    @foreach (var role in Model.AvailableRoles)
+                    {
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="SelectedRoles" value="@role" id="role_@role"
+                                   @(Model.CurrentRoles.Contains(role) ? "checked" : "") />
+                            <label class="form-check-label" for="role_@role">
+                                @role
+                            </label>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="CampusCode" class="form-label"></label>
+                <input asp-for="CampusCode" class="form-control" />
+                <span asp-validation-for="CampusCode" class="text-danger"></span>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+                <a asp-action="Details" asp-route-id="@Model.UserId" class="btn btn-secondary">Hủy</a>
+                <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
