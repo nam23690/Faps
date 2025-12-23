@@ -1,4 +1,5 @@
-﻿using FAP.Common.Domain.Academic.Terms.Services;
+﻿using FAP.Common.Domain.Academic.Terms.Events;
+using FAP.Common.Domain.Academic.Terms.Services;
 using FAP.Common.Domain.Academic.Terms.ValueObjects;
 using FAP.Common.Domain.Common;
 using FAP.Domain.Common;
@@ -21,13 +22,17 @@ public class Term : AggregateRoot
         if (await checker.IsOverlappingAsync(duration))
             throw new DomainException("Term date overlaps");
 
-        return new Term
+        var term = new Term
         {
             Id = Guid.NewGuid(),
             Name = name,
             Duration = duration,
             IsDeleted = false
         };
+
+        term.AddDomainEvent(new TermCreatedDomainEvent(term.Id));
+        return term;
+
     }
 
     public async Task UpdateAsync(
@@ -38,15 +43,18 @@ public class Term : AggregateRoot
         if (await checker.IsOverlappingAsync(duration, Id))
             throw new DomainException("Term overlaps");
 
+        if (IsDeleted)
+            throw new DomainException("Cannot update deleted term");
+
         Name = name;
         Duration = duration;
     }
 
-
-
-
     public void SoftDelete()
     {
+        if (IsDeleted)
+            throw new DomainException("Term already deleted");
         IsDeleted = true;
+        AddDomainEvent(new TermDeletedDomainEvent(Id));
     }
 }
