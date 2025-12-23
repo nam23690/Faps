@@ -44,12 +44,11 @@ namespace FAP.Common.Infrastructure
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<ICampusProvider, CampusProvider>();
             services.AddScoped<IRequestMetadataService, RequestMetadataService>();
-            services.AddScoped<IPerformanceLogRepository, PerformanceLogRepository>();
-            services.AddScoped<IAuditLogRepository, AuditLogRepository>();
-
             services.AddScoped<IPermissionCacheService, PermissionCacheService>();
             services.AddScoped<IRefreshTokenService, RefreshTokenService>();
             services.AddScoped<IExcelService, ExcelService>();
+
+
 
             // =====================================================
             // DB CONTEXTS
@@ -99,7 +98,12 @@ namespace FAP.Common.Infrastructure
             // DDD – REPOSITORIES (EXPLICIT)
             // =====================================================
             services.AddScoped<ITermRepository, TermRepository>();
-            services.AddScoped<IMasterRepository, MasterRepository>();
+            //Auto DI for Repositories
+            services.Scan(scan => scan
+               .FromAssemblyOf<InfrastructureAssemblyMarker>()     // chỉ scan assembly này
+               .AddClasses(classes => classes.InNamespaces("FAP.Common.Infrastructure.Repositories"))
+                   .AsMatchingInterface()                           // match I{ClassName}
+                   .WithScopedLifetime());
 
             // =====================================================
             // DOMAIN SERVICES
