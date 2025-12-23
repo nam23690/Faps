@@ -12,4 +12,11 @@
     <None Remove="Interfaces\**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Identity\" />
+    <Folder Include="StudentManagement\" />
+    <Folder Include="Shared\" />
+    <Folder Include="Teaching\" />
+  </ItemGroup>
+
 </Project>
