@@ -68,11 +68,15 @@ namespace FAP.Common.Infrastructure
 
             //Auto DI for Repositories
             services.Scan(scan => scan
-               .FromAssemblyOf<InfrastructureAssemblyMarker>()     // chỉ scan assembly này
-               .AddClasses(classes => classes.InNamespaces("FAP.Common.Infrastructure.Repositories"))
-                   .AsMatchingInterface()                           // match I{ClassName}
-                   .WithScopedLifetime()
-             );
+                    .FromAssemblyOf<InfrastructureAssemblyMarker>()
+                    .AddClasses(classes =>
+                        classes.InNamespaces(
+                            "FAP.Common.Infrastructure.Repositories",
+                            "FAP.Common.Infrastructure.Academic.Terms"
+                        ))
+                    .AsMatchingInterface()
+                    .WithScopedLifetime());
+
             //services.AddScoped<ITermRepository, TermRepository>();
             //services.AddScoped<IUserRepository, UserRepository>();
 
