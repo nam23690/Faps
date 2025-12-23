@@ -1,5 +1,4 @@
 using FAP.Common.Domain.Academic.Terms;
-using FAP.Common.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -9,21 +8,41 @@ namespace FAP.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<Term> builder)
         {
-            // If the database table is "Terms"
             builder.ToTable("Terms");
+
+            builder.HasKey(t => t.Id);
+
             builder.Property(t => t.Id)
-                   .HasColumnName("TermID"); 
+                   .HasColumnName("TermID");
 
-            builder.Property(t => t.Name)
-                   .IsRequired()
-                   .HasMaxLength(100);
+            // -----------------------------
+            // TermName (ValueObject)
+            // -----------------------------
+            builder.OwnsOne(t => t.Name, name =>
+            {
+                name.Property(n => n.Value)
+                    .HasColumnName("Name")
+                    .HasMaxLength(100)
+                    .IsRequired();
+            });
 
-            builder.Property(t => t.Duration.StartDate)
-                   .IsRequired();
+            // -----------------------------
+            // DateRange (ValueObject)
+            // -----------------------------
+            builder.OwnsOne(t => t.Duration, duration =>
+            {
+                duration.Property(d => d.StartDate)
+                        .HasColumnName("StartDate")
+                        .IsRequired();
 
-            builder.Property(t => t.Duration.EndDate)
-                   .IsRequired();
+                duration.Property(d => d.EndDate)
+                        .HasColumnName("EndDate")
+                        .IsRequired();
+            });
 
+            // -----------------------------
+            // Soft delete
+            // -----------------------------
             builder.Property(t => t.IsDeleted)
                    .HasDefaultValue(false);
         }

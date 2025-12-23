@@ -1,6 +1,9 @@
-﻿using FAP.Common.Infrastructure.EntitiesMaster;
+﻿using FAP.Common.Domain.Events;
+using FAP.Common.Infrastructure.EntitiesMaster;
+using FAP.Domain.Common;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 namespace FAP.Common.Infrastructure.Persistence
 {
@@ -20,6 +23,10 @@ namespace FAP.Common.Infrastructure.Persistence
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            // ❗ BẮT BUỘC: EF KHÔNG ĐƯỢC MAP DOMAIN EVENT
+            builder.Ignore<IDomainEvent>();
+            builder.Ignore<DomainEvent>(); // nếu có class concrete
+
             base.OnModelCreating(builder);
 
             // Đổi tên các bảng Identity từ AspNet* sang App*

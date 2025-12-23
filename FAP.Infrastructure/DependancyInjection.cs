@@ -1,7 +1,10 @@
 using FAP.API.Backend.Services;
 using FAP.Common.Application.Interfaces;
+using FAP.Common.Domain.Academic.Terms.Services;
+using FAP.Common.Infrastructure.EntitiesMaster;
 using FAP.Common.Infrastructure.Files;
 using FAP.Common.Infrastructure.Persistence;
+using FAP.Common.Infrastructure.Repositories;
 using FAP.Common.Infrastructure.Services;
 using FAP.Infrastructure.Persistence;
 using FAP.Infrastructure.Seeders;
@@ -9,21 +12,21 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using FAP.Common.Infrastructure.EntitiesMaster;
-
 
 namespace FAP.Common.Infrastructure
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration config)
+        public static IServiceCollection AddInfrastructure(
+            this IServiceCollection services,
+            IConfiguration config)
         {
-            //services.AddDbContext<UniversityDbContext>(options =>
-            //  options.UseSqlServer(config.GetConnectionString("DefaultConnection")));
-            
-            // Cấu hình Redis cache
+            // =====================================================
+            // CACHE (BẮT BUỘC – FIX TOÀN BỘ AggregateException)
+            // =====================================================
             var redisConnectionString = config.GetConnectionString("Redis");
-            if (!string.IsNullOrEmpty(redisConnectionString))
+
+            if (!string.IsNullOrWhiteSpace(redisConnectionString))
             {
                 services.AddStackExchangeRedisCache(options =>
                 {
@@ -32,81 +35,88 @@ namespace FAP.Common.Infrastructure
             }
             else
             {
-                // Fallback to memory cache nếu không có Redis
-                services.AddDistributedMemoryCache();
+                services.AddDistributedMemoryCache(); // ❗ BẮT BUỘC
             }
 
-            // Đăng ký PermissionCacheService
-            services.AddScoped<IPermissionCacheService, PermissionCacheService>();
-            
-            // Đăng ký RefreshTokenService
-            services.AddScoped<IRefreshTokenService, RefreshTokenService>();
-            
-            services.AddDbContext<LoggingDbContext>(options =>
-                options.UseSqlServer(config.GetConnectionString("Logging")));
-            /*
-            services.AddTransient<IAuditLogRepository, AuditLogRepository>();
-
-           
-            services.AddTransient<IPerformanceLogRepository, PerformanceLogRepository>();
-            */
-            services.AddScoped<IRequestMetadataService, RequestMetadataService>();
-            // Đăng ký các repository, service khác
+            // =====================================================
+            // COMMON SERVICES
+            // =====================================================
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<ICampusProvider, CampusProvider>();
-            services.AddDbContext<UniversityDbContext>((serviceProvider, optionsBuilder) =>
+            services.AddScoped<IRequestMetadataService, RequestMetadataService>();
+            services.AddScoped<IPerformanceLogRepository, PerformanceLogRepository>();
+            services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+
+            services.AddScoped<IPermissionCacheService, PermissionCacheService>();
+            services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+            services.AddScoped<IExcelService, ExcelService>();
+
+            // =====================================================
+            // DB CONTEXTS
+            // =====================================================
+            services.AddDbContext<UniversityDbContext>((sp, options) =>
             {
-                var campusProvider = serviceProvider.GetRequiredService<ICampusProvider>();
-                var connStr = campusProvider.GetCampusConnectionString();
-                optionsBuilder.UseSqlServer(connStr);
+                var campusProvider = sp.GetRequiredService<ICampusProvider>();
+                var connectionString = campusProvider.GetCampusConnectionString();
+                options.UseSqlServer(connectionString);
             });
-            //services.AddScoped<IUniversityDbContext>(provider => provider.GetRequiredService<UniversityDbContext>());
-            //services.AddDbContext<IUniversityDbContext, UniversityDbContext>();
-            
-            services.AddScoped<ILoggingDbContext>(provider => provider.GetRequiredService<LoggingDbContext>());
-            services.AddScoped<ICampusDbContextFactory, CampusDbContextFactory>();
 
-            //Auto DI for Repositories
-            services.Scan(scan => scan
-                    .FromAssemblyOf<InfrastructureAssemblyMarker>()
-                    .AddClasses(classes =>
-                        classes.InNamespaces(
-                            "FAP.Common.Infrastructure.Repositories",
-                            "FAP.Common.Infrastructure.Academic.Terms"
-                        ))
-                    .AsMatchingInterface()
-                    .WithScopedLifetime());
-
-            //services.AddScoped<ITermRepository, TermRepository>();
-            //services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IUniversityDbContext>(sp =>
+                sp.GetRequiredService<UniversityDbContext>());
 
             services.AddDbContext<MasterDbContext>(options =>
             {
                 options.UseSqlServer(config.GetConnectionString("MasterDb"));
             });
 
+            services.AddDbContext<LoggingDbContext>(options =>
+            {
+                options.UseSqlServer(config.GetConnectionString("Logging"));
+            });
+
+            services.AddScoped<ILoggingDbContext>(sp =>
+                sp.GetRequiredService<LoggingDbContext>());
+
+            services.AddScoped<ICampusDbContextFactory, CampusDbContextFactory>();
+
+            // =====================================================
+            // IDENTITY
+            // =====================================================
             services
                 .AddIdentityCore<ApplicationUser>(options =>
                 {
                     options.User.RequireUniqueEmail = true;
                     options.Password.RequiredLength = 6;
                 })
-                .AddRoles<ApplicationRole>() // nếu dùng role
+                .AddRoles<ApplicationRole>()
                 .AddEntityFrameworkStores<MasterDbContext>()
                 .AddDefaultTokenProviders();
 
-            // Đăng ký UserManager và RoleManager để sử dụng trong Application layer
             services.AddScoped<UserManager<ApplicationUser>>();
             services.AddScoped<RoleManager<ApplicationRole>>();
 
-            services.AddScoped<IExcelService, ExcelService>();
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
-            
-            // Đăng ký Seeder
-            services.AddScoped<MasterDbSeeder>();
-            
-            return services;
+            // =====================================================
+            // DDD – REPOSITORIES (EXPLICIT)
+            // =====================================================
+            services.AddScoped<ITermRepository, TermRepository>();
+            services.AddScoped<IMasterRepository, MasterRepository>();
 
+            // =====================================================
+            // DOMAIN SERVICES
+            // =====================================================
+            services.AddScoped<ITermUniquenessChecker, TermUniquenessChecker>();
+
+            // =====================================================
+            // UNIT OF WORK
+            // =====================================================
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            // =====================================================
+            // SEEDERS
+            // =====================================================
+            services.AddScoped<MasterDbSeeder>();
+
+            return services;
         }
     }
 }

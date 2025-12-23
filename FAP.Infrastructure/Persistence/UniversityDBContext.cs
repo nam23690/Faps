@@ -4,6 +4,7 @@ using FAP.Common.Domain.Academic.Terms;
 using FAP.Common.Domain.Base;
 using FAP.Common.Domain.Entities;
 using FAP.Common.Domain.Events;
+using FAP.Domain.Common;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -32,6 +33,9 @@ namespace FAP.Common.Infrastructure.Persistence
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // ❗ BẮT BUỘC: EF KHÔNG ĐƯỢC MAP DOMAIN EVENT
+            modelBuilder.Ignore<IDomainEvent>();
+            modelBuilder.Ignore<DomainEvent>(); // nếu có class concrete
             base.OnModelCreating(modelBuilder);
 
             // Apply all configurations in the current assembly

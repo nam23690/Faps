@@ -1,6 +1,8 @@
 ﻿using FAP.Common.Application.Interfaces;
 using FAP.Common.Domain.Base;
 using FAP.Common.Domain.Entities;
+using FAP.Common.Domain.Events;
+using FAP.Domain.Common;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -25,6 +27,9 @@ namespace FAP.Common.Infrastructure.Persistence
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // ❗ BẮT BUỘC: EF KHÔNG ĐƯỢC MAP DOMAIN EVENT
+            modelBuilder.Ignore<IDomainEvent>();
+            modelBuilder.Ignore<DomainEvent>(); // nếu có class concrete
             base.OnModelCreating(modelBuilder);
 
             // Apply all configurations in the current assembly

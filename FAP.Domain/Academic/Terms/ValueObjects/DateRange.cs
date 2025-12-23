@@ -2,9 +2,13 @@
 
 public sealed class DateRange
 {
-    public DateTime StartDate { get; }
-    public DateTime EndDate { get; }
+    public DateTime StartDate { get; private set; }
+    public DateTime EndDate { get; private set; }
 
+    // 🔒 EF Core constructor
+    private DateRange() { }
+
+    // ✅ Domain constructor
     public DateRange(DateTime start, DateTime end)
     {
         if (start >= end)
