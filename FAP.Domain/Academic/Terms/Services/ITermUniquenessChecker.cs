@@ -4,5 +4,5 @@ namespace FAP.Common.Domain.Academic.Terms.Services;
 
 public interface ITermUniquenessChecker
 {
-    Task<bool> IsOverlappingAsync(DateRange range);
+    Task<bool> IsOverlappingAsync(DateRange range, Guid? excludeTermId = null);
 }

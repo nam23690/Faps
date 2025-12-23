@@ -13,13 +13,16 @@ internal sealed class TermUniquenessChecker : ITermUniquenessChecker
         _context = context;
     }
 
-    public async Task<bool> IsOverlappingAsync(DateRange range)
+    public async Task<bool> IsOverlappingAsync(
+    DateRange duration,
+    Guid? excludeTermId = null)
     {
-        return await _context.Set<Term>()
-            .AnyAsync(t =>
-                !t.IsDeleted &&
-                t.Duration.StartDate < range.EndDate &&
-                t.Duration.EndDate > range.StartDate
-            );
+        return await _context.Terms.AnyAsync(x =>
+            !x.IsDeleted &&
+            (excludeTermId == null || x.Id != excludeTermId) &&
+            x.Duration.StartDate < duration.EndDate &&
+            duration.StartDate < x.Duration.EndDate
+        );
     }
+
 }

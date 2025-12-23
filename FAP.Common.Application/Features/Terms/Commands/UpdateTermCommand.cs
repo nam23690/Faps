@@ -49,7 +49,7 @@ public class UpdateTermCommand : IRequest<Unit>
                 throw new DomainException("Term date overlaps");
             }
 
-            term.Update(
+            term.UpdateAsync(
                 new TermName(request.Name),
                 duration);
 
