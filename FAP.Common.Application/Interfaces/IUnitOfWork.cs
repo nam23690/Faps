@@ -10,7 +10,6 @@ namespace FAP.Common.Application.Interfaces
     {
         public interface IUnitOfWork
         {
-            ITermRepository Terms { get; }
             Task BeginTransactionAsync();
             Task CommitTransactionAsync();
             Task RollbackTransactionAsync();

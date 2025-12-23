@@ -13,17 +13,13 @@ namespace FAP.Infrastructure.Persistence
         private readonly UniversityDbContext _context;
         private IDbContextTransaction? _transaction;
         private TransactionScope? _scope;
-        //Thêm Repository ở đây   
-        private ITermRepository? _terms;
+
 
         public UnitOfWork(UniversityDbContext context)
         {
             _context = context;
         }
 
-        //Khởi tạo các Repository ở đây
-        public ITermRepository Terms =>
-            _terms ??= new TermRepository(_context);
 
         public async Task BeginTransactionAsync()
         {

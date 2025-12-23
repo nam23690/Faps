@@ -18,8 +18,8 @@ internal sealed class TermUniquenessChecker : ITermUniquenessChecker
         return await _context.Set<Term>()
             .AnyAsync(t =>
                 !t.IsDeleted &&
-                t.Duration.Start < range.End &&
-                t.Duration.End > range.Start
+                t.Duration.StartDate < range.EndDate &&
+                t.Duration.EndDate > range.StartDate
             );
     }
 }

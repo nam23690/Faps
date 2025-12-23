@@ -1,33 +1,46 @@
+using MediatR;
 using FAP.Common.Application.Interfaces;
 using FAP.Common.Domain.Academic.Terms;
 using FAP.Common.Domain.Academic.Terms.Services;
 using FAP.Common.Domain.Academic.Terms.ValueObjects;
-using MediatR;
 
-internal sealed class CreateTermCommandHandler
-    : IRequestHandler<CreateTermCommand, Guid>
+namespace FAP.Common.Application.Features.Terms.Commands;
+
+public class CreateTermCommand : IRequest<Guid>
 {
-    private readonly ITermRepository _repo;
-    private readonly ITermUniquenessChecker _checker;
+    public string Name { get; set; } = default!;
+    public DateTime StartDate { get; set; }
+    public DateTime EndDate { get; set; }
 
-    public CreateTermCommandHandler(
-        ITermRepository repo,
-        ITermUniquenessChecker checker)
+    public class Handler : IRequestHandler<CreateTermCommand, Guid>
     {
-        _repo = repo;
-        _checker = checker;
-    }
+        private readonly ITermRepository _termRepository;
+        private readonly ITermUniquenessChecker _checker;
 
-    public async Task<Guid> Handle(CreateTermCommand cmd, CancellationToken ct)
-    {
-        var term = await Term.CreateAsync(
-            new TermName(cmd.Name),
-            new DateRange(cmd.StartDate, cmd.EndDate),
-            _checker
-        );
+        public Handler(
+            ITermRepository termRepository,
+            ITermUniquenessChecker checker)
+        {
+            _termRepository = termRepository;
+            _checker = checker;
+        }
 
-        await _repo.AddAsync(term);
+        public async Task<Guid> Handle(
+            CreateTermCommand request,
+            CancellationToken cancellationToken)
+        {
+            var duration = new DateRange(
+                request.StartDate,
+                request.EndDate);
 
-        return term.Id;
+            var term = await Term.CreateAsync(
+                new TermName(request.Name),
+                duration,
+                _checker);
+
+            await _termRepository.AddAsync(term, cancellationToken);
+
+            return term.Id;
+        }
     }
 }
